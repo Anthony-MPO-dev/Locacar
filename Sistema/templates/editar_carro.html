@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Edição de Contato</h1>
+<form method ="post" action="http://127.0.0.1:8080/contato/editar">
+
+  {% for tupla in dados %}
+    <input type="text" style="display:none" id="id" name="id" value="{{tupla['id']}}"><br>
+    <label for="nome">Nome:</label><br>
+    <input type="text" id="nome" name="nome" value="{{tupla['nome']}}"><br>
+    <label for="telefone">Telefone:</label><br>
+    <input type="text" id="telefone" name="telefone" value="{{tupla['telefone']}}"><br>
+    <label for="email">Email:</label><br>
+    <input type="text" id="email" name="email" value="{{tupla['email']}}"><br><br>
+    <input type="submit" value="Enviar">
+  {% endfor %}
+ 
+</form> 
+
+<p>Ao clicar no botão "Enviar", o contato será cadastrado.</p>
+
+</body>
+</html>

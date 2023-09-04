@@ -1,0 +1,87 @@
+-- Database Locacar
+DROP DATABASE LOCACAR;
+CREATE DATABASE LOCACAR;
+USE LOCACAR;
+
+CREATE TABLE Cliente(
+	id_cliente INT AUTO_INCREMENT,
+    nome_cliente VARCHAR(80) NOT NULL,
+    telefone_cliente VARCHAR(15) NOT NULL, 
+    PRIMARY KEY (id_cliente)
+);
+
+CREATE TABLE Tipo(
+	nome_tipo VARCHAR(30) CHECK (nome_tipo IN ('COMPACTO', 'MEDIO','GRANDE', 'SUV', 'CAMINHAO')),
+    valor_diario DECIMAL(10,2) NOT NULL,
+    valor_semanal DECIMAL(10,2) NOT NULL, 
+    PRIMARY KEY (nome_tipo)
+);
+
+CREATE TABLE Carro(
+	id_carro INT AUTO_INCREMENT,
+	tipo VARCHAR(30),
+	marca VARCHAR(30) NOT NULL,
+	modelo VARCHAR(30) NOT NULL,
+    ano INT NOT NULL,
+    PRIMARY KEY (id_carro),
+    FOREIGN KEY (tipo) REFERENCES Tipo(nome_tipo)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT -- empedira a deleção do tipo em caso de a ver alguem carro cadastrado com este tipo
+);
+
+CREATE TABLE Aluguel(
+	data_inicial TIMESTAMP,
+	id_cliente INT,
+    estado_aluguel VARCHAR(10) CHECK (estado_aluguel IN ('ATIVOS', 'AGENDADO','FINALIZADO')) NOT NULL,
+    NumeroDeDias INT,
+    valor_devido NUMERIC(10,2),
+    PRIMARY KEY (data_inicial, id_cliente),
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT -- empedira a deleção do cliente em caso de a ver algum aluguel cadastrado com o id dele
+);
+
+DELIMITER //
+CREATE TRIGGER ImpedirInsercaoDataPassada
+BEFORE INSERT ON Aluguel FOR EACH ROW
+BEGIN
+    IF NEW.estado_aluguel = 'AGENDADO' AND NEW.data_inicial < NOW() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido cadastrar aluguéis com datas passadas quando o estado é "Agendado".';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Trigger para impedir a alteração do atributo de data_inicial após o cadastro
+DELIMITER //
+CREATE TRIGGER ImpedirAtualizacaoDataAluguel
+BEFORE UPDATE ON Aluguel FOR EACH ROW
+BEGIN
+    IF NEW.data_inicial != OLD.data_inicial THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido alterar o atributo de data_inicial após o cadastro.';
+    END IF;
+END;
+//
+DELIMITER ;
+
+CREATE TABLE RefereCarros(
+	id_carro INT,
+	data_inicial TIMESTAMP,
+	id_cliente INT,
+    PRIMARY KEY (id_carro, data_inicial, id_cliente),
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT, 
+    FOREIGN KEY (id_carro) REFERENCES Carro(id_carro)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT,
+    FOREIGN KEY (data_inicial) REFERENCES Aluguel(data_inicial)
+    ON UPDATE RESTRICT -- não permite que sejam feitas atualizações na data_inicial
+    ON DELETE RESTRICT 
+);
+
+
+
+
