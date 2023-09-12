@@ -1,20 +1,26 @@
-// Obtenha os dados do template
-var dadosCarros = {{ dados | tojson | safe }};
-    
-// Função para preencher um campo de seleção com base em dados
-function preencherSelect(elementId, dataKey) {
-    var select = document.getElementById(elementId);
-    var uniqueValues = [...new Set(dadosCarros.map(item => item[dataKey]))];
-    uniqueValues.forEach(function (value) {
-        var option = document.createElement("option");
-        option.value = value;
-        option.text = value;
-        select.appendChild(option);
-    });
+// Impede a inserção de anos invalidos
+function validarAno(input) {
+    var valor = parseInt(input.value, 10); // Converte o valor inserido em um número inteiro
+    if (valor < 1900 || valor > 2023) {
+        input.setCustomValidity("Digite um ano entre 1900 e 2023.");
+    } else {
+        input.setCustomValidity(""); // Limpa a mensagem de erro personalizada
+    }
 }
 
-// Preencha os campos de seleção com os dados dos carros
-preencherSelect("tipo", "tipo");
-preencherSelect("marca", "marca");
-preencherSelect("modelo", "modelo");
-preencherSelect("ano", "ano");
+
+function verificarSelecao() {
+    var selectElement = document.getElementById("tipo_cadastro");
+    var selectedValue = selectElement.value;
+
+    if (selectedValue !== "") {
+        return true;
+        
+    } else {
+        alert("Por favor, selecione um Tipo de Carro.");
+        return false;
+    }
+}
+
+
+

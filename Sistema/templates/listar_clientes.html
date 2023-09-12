@@ -1,0 +1,93 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento dos clientes{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+  <div class="cadastro">
+
+    <h1>Cadastrar Cliente</h1>
+
+    <form method ="post" action="/cadastrar_cliente" onsubmit="return validarTell()">
+        <label for="nome">Nome:</label><br>
+        <input type="text" id="nome" name="nome" placeholder="Nome do Cliente required" required>
+        <br><br>
+
+        <label for="Telefone">Telefone:</label><br>
+        <label for="ddd">DDD: (</label>
+        <input type="number" required name="ddd" id="ddd" placeholder="" max="99">
+        <span>) </span>
+        <input type="number" required name="telefone" id="telefone" placeholder="9**** ****" max="999999999">
+        <br><br>
+
+        <input type="submit"  value="Enviar">
+    </form> 
+
+  </div>
+
+  <div class="busca">
+
+    <h1>Busca de Clientes</h1>
+    <form action="/buscar_cliente" method="POST">
+      <label for="nome_cliente">Nome</label>
+      <input type="text" id="nome_cliente" name="nome_cliente"> 
+
+      <label for="ddd_cliente">DDD: (</label>
+      <input type="number" id="ddd_cliente" name="ddd_cliente">
+      <span>)</span> 
+
+      <label for="telefone_cliente">Telefone:</label>
+      <input type="number" id="telefone_cliente" name="telefone_cliente">    
+      <input type="submit" value="Buscar">
+
+    </form>
+
+    {% if busca %}
+      <table>
+          <tr>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Aluguel</th>
+              <th>Editar</th>
+              <th>Deletar</th>
+          </tr>
+          {% for tuplas in busca %}
+              <tr>
+                  <td>{{ tuplas["nome_cliente"] }}</td>
+                  <td>{{ tuplas["telefone_cliente"] }}</td>
+                  <td>
+                      <form action="/cliente/aluguel" method="POST">
+                        <input type="hidden" id="id_cliente" name="id_cliente" value="{{ tuplas['id_cliente'] }}">
+                        <input type="hidden" id="nome_cliente" name="nome_cliente" value="{{ tuplas['nome_cliente'] }}">
+                        <button type="submit">Consultar Alugueis</button>
+                      </form>
+                  </td>
+                  <td><a href="{{ url_for('editar_carro', id=tuplas['id_cliente']) }}">Editar</a></td>
+                  <td><a href="">Deletar</a></td>
+              </tr>
+          {% endfor %}
+      </table>
+
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+    {% endif %}
+
+    {% if page > 1 %}
+        <a href="{{ url_for('lista_clientes', page=page-1) }}">Página Anterior</a>
+    {% endif %}
+        <a href="{{ url_for('lista_clientes', page=page+1) }}">Próxima Página</a>
+
+  </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/funcs_cli.js') }}"></script>
+{% endblock %}
+

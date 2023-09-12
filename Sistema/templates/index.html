@@ -1,28 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <header>
-    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="" class="logo-menu">
+{% extends "base.html"%}
+{%block title%}Locacar | Sistema de gerênciamento de veiculos{%endblock%}
 
-    <ul class="lista-de-paginas">
-      <li><a href="#">Dashboard</a></li>
-      <li><a href="#">Controle de Clientes</a></li>
-      <li><a href="{{ url_for('lista_carros') }}">Controle de Carros</a></li>
-      <li><a href="#">Controle de Alugueis</a></li>
-    </ul>
-  </header>
-  <main>
+{% block page_content %}
     <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="Logo">
     <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
-  </main>
-  <footer>
-
-  </footer>
-</body>
-</html>
+{% endblock %}

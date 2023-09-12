@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% endblock %}
+    <title>{%block title%}{%endblock%}</title>
+    {% endblock %}
+  </head>
+  <body>
+    {%block navbar %}
+    <header>
+      <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="" class="logo-menu">
+
+      <ul class="lista-de-paginas">
+        <li><a href="{{ url_for('pagina_principal') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('lista_clientes') }}">Controle de Clientes</a></li>
+        <li><a href="{{ url_for('lista_carros') }}">Controle de Carros</a></li>
+        <li><a href="#">Controle de Alugueis</a></li>
+      </ul>
+    </header>
+    {% endblock %}
+
+    {% block content %}
+    <main>
+      {%block page_content%} {%endblock%}
+    </main>
+    <footer>
+
+    </footer>
+    {% endblock %}
+
+    {% block script %}
+      <script class="MessagemError" id="MessagemError">
+        
+        var flashMessage = "{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}";
+      
+        // Verifica se a variável flashMessage não está vazia
+        if (flashMessage) {
+            alert(flashMessage);
+        }
+        
+      </script>
+    {% endblock %}
+    {% block scripts %}
+    
+
+    {% endblock %}
+  </body>
+</html>

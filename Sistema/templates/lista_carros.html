@@ -1,25 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <header>
-    <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="" class="logo-menu">
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento de carros{%endblock%}
 
-    <ul class="lista-de-paginas">
-      <li><a href="#">Dashboard</a></li>
-      <li><a href="#">Controle de Clientes</a></li>
-      <li><a href="#">Controle de Carros</a></li>
-      <li><a href="#">Controle de Alugueis</a></li>
-    </ul>
-  </header>
-  <main>
-    <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
-    <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+  <div class="cadastro">
+
+    <h1>Cadastrar Carro</h1>
+
+    <form method ="post" action="/cadastro_carro" onsubmit="return verificarSelecao()">
+        <label for="tipo_cadastro">Tipo:</label><br>
+        <select id="tipo_cadastro" name="tipo_cadastro">
+          <option value="">Escolha</option>
+          {% for tipos in tipos %}
+            <option value="{{tipos['nome_tipo']}}">{{tipos['nome_tipo']}}</option>
+          {% endfor %}
+        </select>
+        <br>
+        <label for="marca_carro">Marca:</label><br>
+        <input type="text" id="marca_carro" name="marca_carro" placeholder="Marca do Carro" required ><br>
+        <label for="modelo_carro">Modelo:</label><br>
+        <input type="text" id="modelo_carro" name="modelo_carro" placeholder="Modelo do Carro" required ><br>
+        <label for="ano_carro">Ano:</label><br>
+        <input type="number" id="ano_carro" name="ano_carro" min="1900" max="2023" placeholder="2023" oninput="validarAno(this)"><br><br>
+        <input type="submit" value="Enviar">
+    </form> 
+
+  </div>
+
+  <div class="busca">
 
     <h1>Busca de Carros</h1>
     <form action="/buscar_carros" method="POST">
@@ -27,74 +41,77 @@
       <select id="tipo" name="tipo">
         <option value="">Escolha</option>
       </select>
-      <br>
   
       <label for="marca">Marca:</label>
-      <select id="marca" name="marca">
-        <option value="">Escolha</option>
-      </select>
-      
-      <br>
+      <input type="text" id="marca" name="marca">
   
       <label for="modelo">Modelo:</label>
-      <select id="modelo" name="modelo">
-        <option value="">Escolha</option>
-      </select>
-      <br>
+      <input type="text" id="modelo" name="modelo" >
   
       <label for="ano">Ano:</label>
-      <select id="ano" name="ano">
-        <option value="">Escolha</option>
-      </select>
-      <br>
+      <input id="ano" id="ano" name="ano">
   
       <input type="submit" value="Buscar">
     </form>
 
+    {% if dados %}
     <table>
-      <tr>
-        <th>Tipo</th>
-        <th>Marca</th>
-        <th>Modelo</th>
-        <th>Ano</th>
-      </tr>
-      {% for tupla in dados %}
         <tr>
-          <td>{{tupla["tipo"]}}</td>
-          <td>{{tupla["marca"]}}</td>
-          <td>{{tupla["modelo"]}}</td>
-          <td>{{tupla["ano"]}}</td>
-          <td><a href="{{url_for('editar_carro', id=tupla['id_carro'])}}">Editar</a></td>
-          <td><a href="">Deletar</a></td>
+          <th>Tipo</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Ano</th>
         </tr>
-      {% endfor %}
+        {% for tuplas in dados %}
+          <tr>
+            <td>{{tuplas["tipo"]}}</td>
+            <td>{{tuplas["marca"]}}</td>
+            <td>{{tuplas["modelo"]}}</td>
+            <td>{{tuplas["ano"]}}</td>
+            <td><a href="{{url_for('editar_carro', id=tuplas['id_carro'])}}">Editar</a></td>
+            <td><a href="">Deletar</a></td>
+          </tr>
+        {% endfor %}
     </table>
-  </main>
-  <footer>
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+    {% endif %}
 
-  </footer>
+    {% if page > 1 %}
+      <a href="{{ url_for('lista_clientes', page=page-1) }}">Página Anterior</a>
+    {% endif %}
+      <a href="{{ url_for('lista_clientes', page=page+1) }}">Próxima Página</a>
 
-  <script>
-    // Obtenha os dados do template
-    var dadosCarros = {{ cars_busca | tojson | safe }};
-    
-    // Função para preencher um campo de seleção com base em dados
-    function preencherSelect(elementId, dataKey) {
-        var select = document.getElementById(elementId);
-        var uniqueValues = [...new Set(dadosCarros.map(item => item[dataKey]))];
-        uniqueValues.forEach(function (value) {
-            var option = document.createElement("option");
-            option.value = value;
-            option.text = value;
-            select.appendChild(option);
-        });
-    }
-    
-    // Preencha os campos de seleção com os dados dos carros
-    preencherSelect("tipo", "tipo");
-    preencherSelect("marca", "marca");
-    preencherSelect("modelo", "modelo");
-    preencherSelect("ano", "ano");
-  </script>
-</body>
-</html>
+
+  </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>  
+  // Obtenha os dados do template
+  var dadosCarros = {{ tipos_busca | tojson | safe }};
+  
+  // Função para preencher um campo de seleção com base em dados
+  //dataKey = nome do atributo no banco de dados
+  function preencherSelect(elementId, dataKey, varBusca) {
+      var select = document.getElementById(elementId);
+      var uniqueValues = [...new Set(varBusca.map(item => item[dataKey]))];
+      uniqueValues.forEach(function (value) {
+          var option = document.createElement("option");
+          option.value = value;
+          option.text = value;
+          select.appendChild(option);
+      });
+  }
+  
+  // Preencha os campos de seleção com os dados dos carros
+  preencherSelect("tipo", "tipo", dadosCarros);
+</script>
+
+<script src="{{ url_for('static', filename='js/funcs.js') }}"></script>
+
+{% endblock %}
+

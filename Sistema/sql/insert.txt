@@ -1,10 +1,10 @@
 -- Inserção de Clientes
 INSERT INTO Cliente (nome_cliente, telefone_cliente) VALUES
-    ('Cliente 1', '66999436679'),
-    ('Cliente 2', '66998887776'),
-    ('Cliente 3', '66995554433'),
-    ('Cliente 4', '66992221100'),
-    ('Cliente 5', '66993332211');
+    ('Cliente 1', '(66) 99994-6679'),
+    ('Cliente 2', '(66) 99888-7776'),
+    ('Cliente 3', '(66) 99555-4433'),
+    ('Cliente 4', '(66) 99222-1100'),
+    ('Cliente 5', '(66) 99333-2211');
 
 -- Inserção de Tipos de Carros
 INSERT INTO Tipo (nome_tipo, valor_diario, valor_semanal) VALUES
@@ -22,18 +22,19 @@ INSERT INTO Carro (tipo, marca, modelo, ano) VALUES
     ('MEDIO', 'Toyota', 'Modelo 4', 2021),
     ('GRANDE', 'Chevy', 'Modelo 5', 2019);
 
+
 -- Inserção de Aluguéis (ATIVOS, AGENDADOS, FINALIZADOS)
 INSERT INTO Aluguel (data_inicial, id_cliente, estado_aluguel, NumeroDeDias, valor_devido) VALUES
     ('2023-09-01 08:00:00', 1, 'FINALIZADO', 3, 150.00),
-    ('2023-09-04 09:30:00', 2, 'AGENDADO', 7, 600.00),
+    ('2023-09-11 09:30:00', 2, 'AGENDADO', 7, 600.00),
     ('2023-09-01 11:45:00', 3, 'FINALIZADO', 3, 400.00),
-    ('2023-09-03 14:15:00', 4, 'ATIVOS', 2, 100.00),
-    ('2023-09-05 16:30:00', 5, 'AGENDADO', 4, 400.00);
+    ('2023-09-10 14:15:00', 4, 'ATIVO', 2, 100.00),
+    ('2023-09-15 16:30:00', 5, 'AGENDADO', 4, 400.00);
 
 -- Inserção de Referências entre Carros e Aluguéis
 INSERT INTO RefereCarros (id_carro, data_inicial, id_cliente) VALUES
     (1, '2023-09-01 08:00:00', 1),
-    (2, '2023-09-04 09:30:00', 2),
+    (2, '2023-09-11 09:30:00', 2),
     (3, '2023-09-01 11:45:00', 3),
-    (4, '2023-09-03 14:15:00', 4),
-    (5, '2023-09-05 16:30:00', 5);
+    (4, '2023-09-10 14:15:00', 4),
+    (5, '2023-09-15 16:30:00', 5);

@@ -1,0 +1,93 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento dos alugueis{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+  <div class="cadastro">
+
+    <h1>Cadastrar Aluguel</h1>
+
+    <form method="POST" action="/novo_aluguel" onsubmit="return validarDataHora()" id="form_aluguel">
+      <label for="data_inicial">Data Inicial:</label>
+      <input type="datetime-local" id="data_inicial" name="data_inicial" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" /><br>
+      {% for tuplas in dados %}
+        <input type="hidden" id="id_cliente" value="{{tuplas['id_cliente']}}">
+      {% endfor %}
+
+      <label for="numero_de_dias">Número de Dias:</label>
+      <input type="number" name="numero_de_dias"> <br>
+      <br>
+      
+      <button type="submit">Registrar Aluguel</button>
+    </form>
+
+  </div>
+
+  <div class="busca">
+
+    <h1>Alugueis d(o)\(a) cliente: {{ nome_cliente }}</h1>
+
+
+
+    {% if dados %}
+
+      
+      <table>
+          <tr>
+              <th>Estado</th>
+              <th>Data Inicial</th>
+              <th>Dias Alugados</th>
+              <th>Valor do Aluguel</th>
+              <th>Numero de Carros</th>
+              
+          </tr>
+          {% for tuplas in dados %}
+              <tr>
+                  <td>{{ tuplas["estado_aluguel"] }}</td>
+                  <td>{{ tuplas["data_inicial"] }}</td>
+                  <td>{{ tuplas["NumeroDeDias"] }}</td>
+                  <td>{{ tuplas["valor_devido"] }}</td>
+                  <td>
+                    <p>
+                      {{ tuplas["num_carros"] }}
+                    </p>
+                    <form action="/cliente/aluguel/carros" method="POST">
+                      <input type="hidden" id="id_cliente" name="id_cliente" value="{{ tuplas['id_cliente'] }}">
+                      <input type="hidden" id="data_inicial" name="data_inicial" value="{{ tuplas['data_inicial'] }}">
+                      <button type="submit">Consultar Carros</button>
+                    </form>
+                  </td>
+                  {% if tuplas['estado_aluguel'] != 'FINALIZADO' %}
+                  <td><a href="">Finalizar</a></td>
+                  <td><a href="{{ url_for('editar_carro', id=tuplas['id_cliente']) }}">Editar</a></td>
+                  <td><a href="">Deletar</a></td>
+                  {% else %}
+                  <td>BLOCKED</td>
+                  <td>BLOCKED</td>
+                  <td>BLOCKED</td>
+                  {% endif %}
+                  
+              </tr>
+          {% endfor %}
+      </table>
+
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+    {% endif %}
+
+  </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/funcs_alug.js') }}"></script>
+{% endblock %}
+

@@ -1,0 +1,52 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento dos alugueis{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+
+
+  <div class="busca">
+    
+    {% if carros %}
+    <table>
+      <thead>
+        <tr>
+          <th>Selecionar</th>
+          <th>Tipo</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Ano</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for carros in carros %}
+          <tr>
+            <td><input type="checkbox" name="carro_id" value="{{ carros['id_carro'] }}"></td>
+            <td>{{ carros['tipo'] }}</td>
+            <td>{{ carros['marca'] }}</td>
+            <td>{{ carros['modelo'] }}</td>
+            <td>{{ carros['ano'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% else %}
+      <h1>Todos os carros estaram alugados até essa data.</h1>
+    {% endif %}
+
+  </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/funcs_cli.js') }}"></script>
+{% endblock %}
+
