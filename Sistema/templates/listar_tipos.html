@@ -12,22 +12,26 @@
 
 
   <div class="busca" style="margin-top: 60px; width: 80%;">
-    {% if carros %}
-    <h1>Carro Vinculado ao Aluguel:</h1>
+    {% if dados %}
+    
+    <h1>Taxa de Cobrança por Tipo de Carro no Aluguel:</h1>
 
     <table>
         <tr>
           <th>Tipo</th>
-          <th>Marca</th>
-          <th>Modelo</th>
-          <th>Ano</th>
+          <th>Valor Diário</th>
+          <th>Valor Semanal</th>
+          <th>Multa Diário</th>
+          <th>Multa Semanal</th>
         </tr>
-        {% for tuplas in carros %}
+        {% for tuplas in dados %}
           <tr>
-            <td>{{tuplas["tipo"]}}</td>
-            <td>{{tuplas["marca"]}}</td>
-            <td>{{tuplas["modelo"]}}</td>
-            <td>{{tuplas["ano"]}}</td>
+            <td>{{tuplas["nome_tipo"]}}</td>
+            <td>{{tuplas["valor_diario"]}}</td>
+            <td>{{tuplas["valor_semanal"]}}</td>
+            <td>{{tuplas["multa_diaria"]}}</td>
+            <td>{{tuplas["multa_semanal"]}}</td>
+            <td><a href="{{ url_for('editar_tipos', nome_tipo=tuplas['nome_tipo']) }}">Editar</a></td>
           </tr>
         {% endfor %}
     </table>
@@ -35,19 +39,11 @@
       <h1>Não foram encontrados resultados.</h1>
     {% endif %}
 
+
   </div>
 
-  {% if relatorio %}
-
-    <h1>Relatório do Aluguel: </h1>
-    <p>{{ relatorio }}</p>
-
-  {% endif %}
-
 
 {% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/funcs_cli.js') }}"></script>
-{% endblock %}
+
 

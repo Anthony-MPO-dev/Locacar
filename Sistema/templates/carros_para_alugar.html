@@ -11,31 +11,41 @@
 
 
 
-  <div class="busca">
+  <div class="busca aluguel">
     
     {% if carros %}
-    <table>
-      <thead>
-        <tr>
-          <th>Selecionar</th>
-          <th>Tipo</th>
-          <th>Marca</th>
-          <th>Modelo</th>
-          <th>Ano</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for carros in carros %}
+    <form class="form" action="/novo_aluguel/cadastrar" method="POST">
+      <table>
+        <thead>
           <tr>
-            <td><input type="checkbox" name="carro_id" value="{{ carros['id_carro'] }}"></td>
-            <td>{{ carros['tipo'] }}</td>
-            <td>{{ carros['marca'] }}</td>
-            <td>{{ carros['modelo'] }}</td>
-            <td>{{ carros['ano'] }}</td>
+            <th>Selecionar</th>
+            <th>Tipo</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Ano</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          
+          {% for carros in carros %}
+            <tr>
+              <td><input type="radio" name="id_carro" id="id_carro" value="{{ carros['id_carro'] }}"></td>
+              <td>{{ carros['tipo'] }}</td>
+              <td>{{ carros['marca'] }}</td>
+              <td>{{ carros['modelo'] }}</td>
+              <td>{{ carros['ano'] }}</td>
+            </tr>
+          {% endfor %}     
+        </tbody>
+      </table>
+
+      <input type="hidden" id="id_cliente"     name="id_cliente"     value="{{ id_cliente }}">
+      <input type="hidden" id="data_inicial"   name="data_inicial"   value="{{ data_inicial }}">
+      <input type="hidden" id="estado_aluguel" name="estado_aluguel" value="{{ estado_aluguel }}">
+      <input type="hidden" id="numero_dias"    name="numero_dias"    value="{{ numero_dias }}">
+      <br><br>
+      <input type="submit" value="Cadastrar Aluguel"></input>
+    </form>
 
     {% else %}
       <h1>Todos os carros estaram alugados até essa data.</h1>

@@ -1,0 +1,51 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento de carros{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  {% for tupla in dados %}
+
+    <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+    <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+    <div class="cadastro">
+
+      <h1>Pagamento do Aluguel</h1>
+
+      <form class="form form-pagamento" method ="POST" action="/verifica_pagamento" onsubmit="return verificarSelecao()">
+        
+        <input type="hidden" id="id_cliente" name="id_cliente" value="{{tupla['id_cliente']}}">
+        <input type="hidden" id="id_carro" name="id_carro" value="{{tupla['id_carro']}}">
+        
+        <label for="data_inicial">Data Inicial:</label>
+        <input type="datetime-local" id="data_inicial" name="data_inicial"  required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" value="{{tupla['data_inicial']}}" required readonly>
+        
+        <label for="data_retorno">Data Final:</label>
+        <input type="datetime-local" id="data_retorno" name="data_retorno" value="{{ data_retorno }}" required pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" readonly required>
+        
+        <label for="valor_devido">Valor Devido:</label>
+        <input type="text" id="valor_devido" name="valor_devido" value ="{{ valor_devido }}" readonly>
+
+        <label for="valor_pago">Valor Pago:</label>
+        <input type="text" id="valor_pago" name="valor_pago" placeholder="R$ 0.00" required>
+        
+        <label for="relatorio">Relatório (máximo de 300 caracteres):</label>
+        <textarea id="relatorio" name="relatorio" maxlength="300" required></textarea>
+        
+        <input type="submit" value="Pagar">
+      </form> 
+    </div>
+
+  {% endfor %}
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/funcs.js') }}"></script>
+
+{% endblock %}

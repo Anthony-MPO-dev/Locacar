@@ -1,0 +1,4 @@
+Flask==2.1.1
+mysql-connector-python==8.0.28
+python-dateutil==2.8.2
+markupsafe==2.1.1

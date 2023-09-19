@@ -13,7 +13,7 @@
 
     <h1>Cadastrar Carro</h1>
 
-    <form method ="post" action="/cadastro_carro" onsubmit="return verificarSelecao()">
+    <form class="form form-carro" method ="post" action="/cadastro_carro" onsubmit="return verificarSelecao()">
         <label for="tipo_cadastro">Tipo:</label><br>
         <select id="tipo_cadastro" name="tipo_cadastro">
           <option value="">Escolha</option>
@@ -36,7 +36,7 @@
   <div class="busca">
 
     <h1>Busca de Carros</h1>
-    <form action="/buscar_carros" method="POST">
+    <form class="form form-busca" action="/buscar_carros" method="POST">
       <label for="tipo">Tipo:</label>
       <select id="tipo" name="tipo">
         <option value="">Escolha</option>
@@ -69,18 +69,22 @@
             <td>{{tuplas["modelo"]}}</td>
             <td>{{tuplas["ano"]}}</td>
             <td><a href="{{url_for('editar_carro', id=tuplas['id_carro'])}}">Editar</a></td>
-            <td><a href="">Deletar</a></td>
+            <td><a href="{{url_for('deletar_carro', id_carro=tuplas['id_carro'])}}">Deletar</a></td>
           </tr>
         {% endfor %}
     </table>
-    {% else %}
-      <h1>Não foram encontrados resultados.</h1>
-    {% endif %}
-
+      
     {% if page > 1 %}
-      <a href="{{ url_for('lista_clientes', page=page-1) }}">Página Anterior</a>
-    {% endif %}
-      <a href="{{ url_for('lista_clientes', page=page+1) }}">Próxima Página</a>
+    <a href="{{ url_for('lista_carros', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+
+  {% endif %}
+    <a href="{{ url_for('lista_carros', page=page+1) }}"><i class="fa fa-arrow-alt-circle-right"></i></a>
+
+  {% else %}
+    <h1>Não foram encontrados resultados.</h1>
+    <a href="{{ url_for('lista_carros', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+  {% endif %}
+
 
 
   </div>

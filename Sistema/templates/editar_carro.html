@@ -1,23 +1,49 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h1>Edição de Contato</h1>
-<form method ="post" action="http://127.0.0.1:8080/contato/editar">
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento de carros{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
 
   {% for tupla in dados %}
-    <input type="text" style="display:none" id="id" name="id" value="{{tupla['id']}}"><br>
-    <label for="nome">Nome:</label><br>
-    <input type="text" id="nome" name="nome" value="{{tupla['nome']}}"><br>
-    <label for="telefone">Telefone:</label><br>
-    <input type="text" id="telefone" name="telefone" value="{{tupla['telefone']}}"><br>
-    <label for="email">Email:</label><br>
-    <input type="text" id="email" name="email" value="{{tupla['email']}}"><br><br>
-    <input type="submit" value="Enviar">
+
+    <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+    <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+    <div class="cadastro">
+
+      <h1>Editar Carro</h1>
+
+      <form class="form form-carro" method ="POST" action="/editar_carro" onsubmit="return verificarSelecao()">
+        
+        <input type="hidden" id="id_carro" name="id_carro" value="{{tupla['id_carro']}}"><br>
+        
+        <label for="tipo">Tipo:</label><br>
+          <select id="tipo" name="tipo">
+            <option value="{{tupla['tipo']}}">{{tupla['tipo']}}</option>
+            {% for tipos in tipos %}
+              <option value="{{tipos['nome_tipo']}}">{{tipos['nome_tipo']}}</option>
+            {% endfor %}
+          </select>
+          <br>
+          <label for="marca_carro">Marca:</label><br>
+          <input type="text" id="marca_carro" name="marca_carro" placeholder="Marca do Carro" value="{{tupla['marca']}}" required ><br>
+          <label for="modelo_carro">Modelo:</label><br>
+          <input type="text" id="modelo_carro" name="modelo_carro" placeholder="Modelo do Carro" value="{{tupla['modelo']}}"  required ><br>
+          <label for="ano_carro">Ano:</label><br>
+          <input type="number" id="ano_carro" name="ano_carro" min="1900" max="2023" placeholder="2023" value="{{tupla['ano']}}"  oninput="validarAno(this)"><br><br>
+          <input type="submit" value="Enviar">
+      </form> 
+    </div>
+
   {% endfor %}
- 
-</form> 
 
-<p>Ao clicar no botão "Enviar", o contato será cadastrado.</p>
 
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/funcs.js') }}"></script>
+
+{% endblock %}

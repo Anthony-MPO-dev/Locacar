@@ -1,0 +1,47 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento de carros{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+  {% for tuplas in dados %}
+    <div class="cadastro">
+
+      <h1>Editar Cliente</h1>
+  
+      <form class="form form-cliente" method ="post" action="/editar_cliente" onsubmit="return validarTell()">
+          
+          <input type="hidden" id="id_cliente" name="id_cliente" value="{{tuplas['id_cliente']}}">
+
+          <label for="nome">Nome:</label><br>
+          <input type="text" id="nome" name="nome" placeholder="Nome do Cliente" value="{{tuplas['nome_cliente']}}" required>
+          <br><br>
+  
+          <label for="Telefone">Telefone:</label><br>
+          <div>
+            <label for="ddd">DDD:</label>
+            <input type="number" required name="ddd" id="ddd" placeholder="" value="{{ddd}}" max="99">        
+            <input type="number" required name="telefone" id="telefone" placeholder="9********" value="{{telefone}}" max="999999999">
+          </div>
+          <br><br>
+  
+          <input type="submit"  value="Enviar">
+      </form> 
+  
+    </div>
+
+  {% endfor %}
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/funcs_cli.js') }}"></script>
+{% endblock %}

@@ -6,31 +6,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     {% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/varibles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
     {% endblock %}
+
+    {% block addstyle %}
+    {% endblock %}
+    
     <title>{%block title%}{%endblock%}</title>
     {% endblock %}
   </head>
   <body>
+
+    {% block classealta %}
+    {% endblock %}
+    
     {%block navbar %}
-    <header>
-      <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="" class="logo-menu">
+    <header class="header">
+      <a class="img-logo" href="{{ url_for('pagina_principal') }}">
+        <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="" class="logo-menu">
+      </a>
 
       <ul class="lista-de-paginas">
-        <li><a href="{{ url_for('pagina_principal') }}">Dashboard</a></li>
-        <li><a href="{{ url_for('lista_clientes') }}">Controle de Clientes</a></li>
-        <li><a href="{{ url_for('lista_carros') }}">Controle de Carros</a></li>
-        <li><a href="#">Controle de Alugueis</a></li>
+        <li>
+          <i class="fa fa fa-warehouse">
+            <a class="menu-option" href="{{ url_for('pagina_principal') }}">Dashboard</a>
+          </i>
+        </li>
+        <li>
+          <i class="fa fa-user">
+            <a class="menu-option" href="{{ url_for('lista_clientes') }}">Controle de Clientes</a>
+          </i>
+        </li>
+        <li>
+          <i class="fas fa-car">
+            <a class="menu-option" href="{{ url_for('lista_carros') }}">Controle de Carros</a>
+          </i>
+        </li>
+        <li>
+          <i class="fas fa-clipboard-list">
+            <a class="menu-option" href="{{ url_for('consulta_alugueis') }}">Controle de Alugueis</a>
+          </i>
+        </li>
+        <li>
+          <i class="fa fa-money-bill">
+            <a class="menu-option" href="{{ url_for('lista_tipos') }}">Tabela de Valores</a>
+          </i>
+        </li>
+        
       </ul>
+
+      <nav class="navegator">
+
+        <input type="checkbox" id="menu-hamburger">
+  
+        <label for="menu-hamburger">
+            <div class="menu">
+                <span class="hamburger"></span>
+            </div>
+        </label>
+  
+        <ul class="lista-de-paginas2">
+          <li>
+            <i class="fa fa fa-warehouse">
+              <a class="menu-option" href="{{ url_for('pagina_principal') }}">Dashboard</a>
+            </i>
+          </li>
+          <li>
+            <i class="fa fa-user">
+              <a class="menu-option" href="{{ url_for('lista_clientes') }}">Controle de Clientes</a>
+            </i>
+          </li>
+          <li>
+            <i class="fas fa-car">
+              <a class="menu-option" href="{{ url_for('lista_carros') }}">Controle de Carros</a>
+            </i>
+          </li>
+          <li>
+            <i class="fas fa-clipboard-list">
+              <a class="menu-option" href="{{ url_for('consulta_alugueis') }}">Controle de Alugueis</a>
+            </i>
+          </li>
+          <li>
+            <i class="fa fa-money-bill">
+              <a class="menu-option" href="{{ url_for('lista_tipos') }}">Tabela de Valores</a>
+            </i>
+          </li>
+          
+        </ul>
+      </nav>
     </header>
+
     {% endblock %}
 
     {% block content %}
-    <main>
+    <main class="main">
       {%block page_content%} {%endblock%}
     </main>
-    <footer>
+    <footer class="footer" id="contact">
 
+      <h4>Sistema Locacar</h4>
+
+      <nav>
+          <ul>
+              <li><a href="https://github.com/Anthony-MPO-dev" target="_blank">About</a></li>
+              <li><a href="https://github.com/Anthony-MPO-dev" target="_blank">Services</a></li>
+              <li><a href="https://github.com/Anthony-MPO-dev" target="_blank">Projects</a></li>
+          </ul>
+      </nav>
+
+      <div class="social">
+          <a href="">
+              <i class="fab fa-facebook-square"></i>
+          </a>
+          <a href="">
+              <i class="fab fa-instagram"></i>
+          </a>
+          <a href="">
+              <i class="fab fa-twitter-square"></i>
+
+      </div>
     </footer>
     {% endblock %}
 
@@ -43,6 +142,24 @@
         if (flashMessage) {
             alert(flashMessage);
         }
+
+        // Seleciona o elemento do menu lateral
+        const menuAmburguer = document.querySelector('.navegator');
+        const menuLateral = document.querySelector('.lista-de-paginas');
+        const Logo = document.querySelector('.img-logo');
+
+        // Função para ajustar a posição do menu
+        function ajustarMenuLateral() {
+          const scrollTop = window.scrollY; // Obtém a posição de rolagem vertical
+
+          // Define a posição do menu com base na posição de rolagem
+          menuAmburguer.style.transform = `translateY(${scrollTop}px)`;
+          menuLateral.style.transform = `translateY(${scrollTop}px)`;
+          Logo.style.transform = `translateY(${scrollTop}px)`;
+        }
+
+        // Adiciona um evento de rolagem para chamar a função de ajuste
+        window.addEventListener('scroll', ajustarMenuLateral);
         
       </script>
     {% endblock %}

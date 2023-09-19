@@ -1,0 +1,49 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento de carros{%endblock%}
+
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+  {% for tuplas in dados %}
+    <div class="cadastro">
+
+      <h1>Editar Taxas de Cobrança por Tipo de Carro</h1>
+  
+      <form class="form form-tipos" method ="post" action="/tipo/editar/" onsubmit="return validarTell()">
+          
+
+        <label for="nome_tipo">Tipo:</label><br>
+        <input id="nome_tipo" name="nome_tipo" value="{{ nome }}" readonly required><br><br>
+
+        <h2>Valores de Cobrança:</h2>
+        <br>
+
+        <label for="valor_diario">Valor diário:</label><br>
+        <input type="number" id="valor_diario" name="valor_diario" placeholder="R$ 0.00" value="{{tuplas['valor_diario']}}" required ><br>
+        <label for="valor_semanal">Valor semanal:</label><br>
+        <input type="number" id="valor_semanal" name="valor_semanal" placeholder="R$ 0.00" value="{{tuplas['valor_semanal']}}" required ><br>
+        <label for="nulta_diaria">Multa diária:</label><br>
+        <input type="number" id="multa_diaria" name="multa_diaria" placeholder="R$ 0.00" value="{{tuplas['valor_diario']}}" required ><br>
+        <label for="valor_semanal">Multa Semanal:</label><br>
+        <input type="number" id="multa_semanal" name="multa_semanal" placeholder="R$ 0.00" value="{{tuplas['multa_semanal']}}" required >
+        <br><br>
+        <input type="submit" value="Enviar">
+      </form> 
+  
+    </div>
+
+  {% endfor %}
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/funcs_cli.js') }}"></script>
+{% endblock %}

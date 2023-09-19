@@ -1,195 +1,111 @@
+-- Database Locacar
+CREATE DATABASE LOCACAR;
 USE LOCACAR;
 
-DELIMITER $$
-CREATE FUNCTION conta_carros(tipo_carro varchar(30))
-returns INT reads SQL data
-DETERMINISTIC
-BEGIN
-	DECLARE qtd INT;
-    SELECT count(*) INTO qtd from Carro as C
-    WHERE C.tipo = tipo_carro;
-    return qtd;
-END $$
-DELIMITER ;
-
-DROP Function conta_carros; 
-
-SELECT conta_carros('MEDIO');
-
-DELIMITER $$
-CREATE FUNCTION media_valores_devidos()
-returns numeric(10,2) reads sql data
-BEGIN
-	DECLARE media numeric(10,2);
-    SELECT avg(valor_devido) INTO media from Aluguel;
-    return media;
-END $$
-DELIMITER ;
-
-DROP Function media_valores_devidos; 
-
-Select media_valores_devidos();
-
-DELIMITER $$
-CREATE FUNCTION num_alug_carros()
-returns int reads sql data
-BEGIN
-	DECLARE qtd int;
-    Select count(R.id_carro)) into qtd from RefereCarros as R, Cliente as C, Aluguel as A
-    Where R.id_cliente = C.id_cliente AND R.data_inicial = A.data_inicial;
-    return qtd;
-END$$
-DELIMITER ;
-
-
-DELIMITER $$
-CREATE PROCEDURE cliente_maior_qtd_carros(out qtd int)
-BEGIN
-	Select MAX(R.id_carro) INTO qtd from Cliente as C, RefereCarros as R, Aluguel as A
-    Where R.id_cliente = C.id_cliente AND R.data_inicial = A.data_inicial;
-END$$
-DELIMITER ;
-
-DROP procedure cliente_maior_qtd_carros;
-
-CALL cliente_maior_qtd_carros(@maiorqtdCarros_Alugados);
-
-select @maiorqtdCarros_alugados;
-
-
-SELECT *
-FROM Carro
-WHERE id_carro NOT IN (
-    SELECT RC.id_carro
-    FROM RefereCarros AS RC
-    INNER JOIN Aluguel AS A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
-    WHERE A.estado_aluguel = 'ATIVOS'
+CREATE TABLE Cliente(
+	id_cliente INT AUTO_INCREMENT,
+    nome_cliente VARCHAR(80) UNIQUE NOT NULL,
+    telefone_cliente VARCHAR(15) NOT NULL, 
+    PRIMARY KEY (id_cliente)
 );
 
-SELECT C.id_carro, C.tipo, C.marca, C.modelo, C.ano
-FROM Carro AS C
-LEFT JOIN RefereCarros AS RC ON C.id_carro = RC.id_carro
-LEFT JOIN Aluguel AS A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
-WHERE A.estado_aluguel IS NULL OR A.estado_aluguel <> 'ATIVOS';
+CREATE TABLE Tipo(
+	nome_tipo VARCHAR(30) CHECK (nome_tipo IN ('COMPACTO', 'MEDIO','GRANDE', 'SUV', 'CAMINHAO')),
+    valor_diario DECIMAL(10,2) NOT NULL,
+    valor_semanal DECIMAL(10,2) NOT NULL, 
+    multa_diaria DECIMAL(10,2) NOT NULL,
+    multa_semanal DECIMAL(10,2) NOT NULL, 
+    PRIMARY KEY (nome_tipo)
+);
 
-use LOCACAR;
+CREATE TABLE Carro(
+	id_carro INT AUTO_INCREMENT,
+	tipo VARCHAR(30),
+	marca VARCHAR(30) NOT NULL,
+	modelo VARCHAR(30) NOT NULL,
+    ano INT NOT NULL,
+    PRIMARY KEY (id_carro),
+    FOREIGN KEY (tipo) REFERENCES Tipo(nome_tipo)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT -- empedira a deleção do tipo em caso de a ver algum carro cadastrado com este tipo
+);
 
-select * from Tipo;
-
-SELECT tipo, marca, modelo, ano
-FROM Carro
-GROUP BY ano;
-
-
-Select * from Cliente Where telefone_cliente Like "(__) 99%";
-
-
-SELECT count(C.id_carro) from Aluguel as A, RefereCarros as R, Carro as C WHERE R.id_cliente = '1' AND R.id_carro = C.id_carro AND A.id_cliente = '1';
-    
-use LOCACAR;
-
-
-SELECT COUNT(C.id_carro) AS num_carros
-                        FROM Aluguel AS A, RefereCarros AS R, Carro AS C
-                        WHERE A.data_inicial = R.data_inicial
-                        AND A.id_cliente = R.id_cliente
-                        AND A.data_inicial = '2023-09-01 08:00:00'
-                        AND A.id_cliente = 1
-                        AND C.id_carro = R.id_carro;
-                        
-SELECT C.*
-FROM Carro AS C
-INNER JOIN RefereCarros AS RC ON C.id_carro = RC.id_carro
-WHERE RC.id_cliente = 1 AND RC.data_inicial = '2023-09-01 08:00:00';
-
-
-SELECT C.id_carro, C.tipo, C.marca, C.modelo, C.ano
-FROM Carro AS C
-LEFT JOIN RefereCarros AS RC ON C.id_carro = RC.id_carro
-LEFT JOIN Aluguel AS A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
-WHERE A.estado_aluguel IS NULL OR A.estado_aluguel NOT IN ('ATIVO', 'AGENDADO')
-   OR RC.id_carro IS NULL;
-
-
-use LOCACAR;
-
-
-SELECT A.*, (SELECT COUNT(*) FROM RefereCarros WHERE data_inicial = A.data_inicial AND id_cliente = A.id_cliente) AS num_carros
-                        FROM Aluguel AS A
-                        WHERE id_cliente = 1
-                        LIMIT 0, 5;
-                        
-SELECT C.id_carro, C.tipo, C.marca, C.modelo, C.ano
-FROM Carro AS C
-LEFT JOIN RefereCarros AS RC ON C.id_carro = RC.id_carro
-LEFT JOIN Aluguel AS A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
-WHERE (A.estado_aluguel IS NULL OR A.estado_aluguel NOT IN ('ATIVO', 'AGENDADO'))
-AND (A.data_inicial >= '2023-09-01 08:00:00' OR RC.data_inicial IS NULL)
-AND (RC.data_inicial IS NULL OR DATE_ADD(RC.data_inicial, INTERVAL 5 DAY) <= '2023-09-01 08:00:00');
+CREATE TABLE Aluguel(
+	data_inicial TIMESTAMP,
+	id_cliente INT,
+    id_carro INT,
+    estado_aluguel VARCHAR(10) 
+    CHECK (estado_aluguel IN ('ATIVO', 'AGENDADO','FINALIZADO', 'PENDENTE')) NOT NULL,
+    NumeroDeDias INT,
+    valor_devido NUMERIC(10,2),
+    data_retorno TIMESTAMP,
+    relatorio VARCHAR(300) CHECK (LENGTH(relatorio) <= 300), -- Usei a cláusula CHECK para impor o limite de caracteres
+    PRIMARY KEY (data_inicial, id_cliente, id_carro),
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT, -- empedira a deleção do cliente em caso de a ver algum aluguel cadastrado com o id dele
+	FOREIGN KEY (id_carro) REFERENCES Carro(id_carro)
+    ON UPDATE RESTRICT -- Não permite update de carros cadastrados em um aluguel 
+    ON DELETE RESTRICT -- Não permite a deleção do carro se ele estiver referenciado aqui
+);
 
 
 DELIMITER //
-
-CREATE FUNCTION CarrosDisponiveisApartirDeData(data_inicial_param DATETIME)
-RETURNS VARCHAR(255) READS SQL DATA -- Altere o tipo de retorno conforme necessário
+CREATE TRIGGER ImpedirInsercaoDataPassada
+BEFORE INSERT ON Aluguel FOR EACH ROW
 BEGIN
-    DECLARE carros_disponiveis VARCHAR(255) DEFAULT '';
+    IF NEW.estado_aluguel = 'AGENDADO' AND NEW.data_inicial < NOW() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido cadastrar aluguéis com datas passadas quando o estado é "Agendado".';
+    END IF;
+END;
+//
+DELIMITER ;
 
-    -- Crie sua lógica para buscar carros disponíveis aqui e concatene os resultados em carros_disponiveis
+DROP TRIGGER ImpedirInsercaoDataPassada;
 
-    -- Exemplo de lógica simples:
-    SELECT GROUP_CONCAT(CONCAT('ID: ', id_carro, ', Marca: ', marca, ', Modelo: ', modelo) SEPARATOR '; ')
-    INTO carros_disponiveis
-    FROM Carro
-    WHERE id_carro NOT IN (
-        SELECT DISTINCT id_carro
-        FROM RefereCarros RC
-        INNER JOIN Aluguel A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
-        WHERE A.estado_aluguel IN ('ATIVO', 'AGENDADO') AND A.data_inicial <= data_inicial_param
-    );
+-- Trigger para impedir a alteração do atributo de data_inicial após o cadastro
+DELIMITER //
+CREATE TRIGGER ImpedirAtualizacaoDataAluguel
+BEFORE UPDATE ON Aluguel FOR EACH ROW
+BEGIN
+    IF NEW.data_inicial != OLD.data_inicial THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido alterar o atributo de data_inicial após o cadastro.';
+    END IF;
+END;
+//
+DELIMITER ;
 
-    RETURN carros_disponiveis;
+DROP TRIGGER ImpedirAtualizacaoDataAluguel;
+
+DELIMITER //
+
+CREATE TRIGGER ImpedirUpdateAluguelFinalizado
+BEFORE UPDATE ON Aluguel FOR EACH ROW
+BEGIN
+    DECLARE estado_aluguel VARCHAR(10);
+    DECLARE valor_devido NUMERIC(10,2);
+
+    -- Consulte o estado do aluguel associado a este Aluguel
+    SELECT estado_aluguel, valor_devido INTO estado_aluguel, valor_devido
+    FROM Aluguel
+    WHERE data_inicial = OLD.data_inicial AND id_cliente = OLD.id_cliente;
+
+    -- Verifique se o estado_aluguel é "FINALIZADO"
+    IF estado_aluguel = 'FINALIZADO' AND valor_devido != NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido update carros associados a aluguéis com estado "FINALIZADO".';
+    END IF;
 END;
 //
 
-DELIMITER ;
-
-
-
 DELIMITER //
 
-CREATE FUNCTION CarrosDisponiveisApartirDeData(data_inicial_param DATETIME)
-RETURNS VARCHAR(255)
-READS SQL DATA
-BEGIN
-    DECLARE carros_disponiveis VARCHAR(255) DEFAULT '';
-    DECLARE data_termino TIMESTAMP;
-
-    -- Crie sua lógica para buscar carros disponíveis aqui e concatene os resultados em carros_disponiveis
-	
-    -- Exemplo de lógica simples:
-    SELECT GROUP_CONCAT(CONCAT(id_carro) SEPARATOR '; ')
-    INTO carros_disponiveis
-    FROM Carro
-    WHERE id_carro NOT IN (
-        SELECT DISTINCT id_carro
-        FROM RefereCarros RC
-        INNER JOIN Aluguel A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
-        WHERE A.estado_aluguel IN ('ATIVO', 'AGENDADO') AND A.data_inicial <= (SELECT CalcularDataTerminoAluguel('2023-09-10', 7) INTO data_termino)
-    );
-
-    RETURN carros_disponiveis;
-END;
-//
-
-DELIMITER ;
-
-DELIMITER //
-
-CREATE FUNCTION CalcularDataTerminoAluguel(data_inicial_param DATETIME, numero_de_dias INT) RETURNS DATETIME
+CREATE FUNCTION CalcularDataTerminoAluguel(data_inicial_param TIMESTAMP, numero_de_dias INT) RETURNS DATETIME
 DETERMINISTIC
 BEGIN
-    DECLARE data_termino DATETIME;
+    DECLARE data_termino TIMESTAMP;
 
     -- Calcula a data de término adicionando o número de dias à data de início
     SET data_termino = DATE_ADD(data_inicial_param, INTERVAL numero_de_dias DAY);
@@ -200,18 +116,94 @@ END;
 
 DELIMITER ;
 
-SELECT 
-    C.*
-FROM 
-    Carro AS C
-WHERE
-    C.id_carro IN (
-        SELECT DISTINCT RC.id_carro
-        FROM RefereCarros AS RC
-        INNER JOIN Aluguel AS A ON RC.data_inicial = A.data_inicial
-        WHERE A.estado_aluguel IN ('ATIVO', 'AGENDADO', 'FINALIZADO')
-        AND CalcularDataTerminoAluguel(A.data_inicial, A.NumeroDeDias) <= '2023-09-10' -- Data inicial fornecida
-    );
+
+-- DELIMITER //
+
+-- CREATE FUNCTION CarrosDisponiveisApartirDeData(data_inicial_param DATETIME)
+-- RETURNS VARCHAR(255)
+-- READS SQL DATA
+-- BEGIN
+--    DECLARE carros_disponiveis VARCHAR(255) DEFAULT '';
+--    DECLARE data_termino TIMESTAMP;
+--
+--    -- Crie sua lógica para buscar carros disponíveis aqui e concatene os resultados em carros_disponiveis
+	
+    -- Exemplo de lógica simples:
+--    SELECT GROUP_CONCAT(CONCAT(id_carro) SEPARATOR '; ')
+--    INTO carros_disponiveis
+--    FROM Carro
+--    WHERE id_carro NOT IN (
+--        SELECT DISTINCT id_carro
+--        FROM RefereCarros RC
+--        INNER JOIN Aluguel A ON RC.data_inicial = A.data_inicial AND RC.id_cliente = A.id_cliente
+--        WHERE A.estado_aluguel IN ('ATIVO', 'AGENDADO') AND A.data_inicial <= (SELECT CalcularDataTerminoAluguel('2023-09-10', 7)) AND estado_carro IN ('DEVOLVIDO','ALUGADO') 
+--    );
+
+--    RETURN carros_disponiveis;
+-- END;
+-- //
+
+-- DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE atualizar_estado_alugueis()
+BEGIN
+    -- Atualiza o estado de alugueis de "AGENDADO" para "ATIVO"
+    UPDATE Aluguel
+    SET estado_aluguel = 'ATIVO'
+    WHERE estado_aluguel = 'AGENDADO' AND data_inicial <= NOW();
+
+    -- Atualiza estado do Aluguel
+    UPDATE Aluguel
+    SET estado_aluguel = 'PENDENTE'
+    WHERE estado_aluguel = 'ATIVO' AND data_retorno <= NOW();
+END;
+//
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER ImpedirDELETECarroComAluguel
+BEFORE DELETE ON Carro FOR EACH ROW
+BEGIN
+    DECLARE carro_id INT;
+    
+    -- Verifica se o carro está associado a aluguéis ativos
+    SELECT id_carro INTO carro_id
+    FROM Aluguel
+    WHERE id_carro = OLD.id_carro AND estado_aluguel IN ('ATIVO', 'AGENDADO','PENDENTE');
+    
+    IF carro_id IS NOT NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido excluir um carro associado a aluguéis ativos.';
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER ImpedirUPDATECarroComAluguel
+BEFORE UPDATE ON Carro FOR EACH ROW
+BEGIN
+    DECLARE carro_id INT;
+    
+    -- Verifica se o carro está associado a aluguéis ativos
+    SELECT id_carro INTO carro_id
+    FROM Aluguel
+    WHERE id_carro = OLD.id_carro AND estado_aluguel IN ('ATIVO', 'AGENDADO','PENDENTE');
+    
+    IF carro_id IS NOT NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Não é permitido editar um carro associado a aluguéis ativos.';
+    END IF;
+END;
+//
+
+DELIMITER ;
 
 
 

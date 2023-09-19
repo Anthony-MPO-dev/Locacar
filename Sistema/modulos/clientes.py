@@ -1,5 +1,6 @@
 from markupsafe import escape
 
+
 def trata_busca_clientes(especificacoes):
     if len(especificacoes) > 0:
 

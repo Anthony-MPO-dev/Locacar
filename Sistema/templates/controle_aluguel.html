@@ -1,0 +1,264 @@
+{% extends "base.html"%}
+{%block title%}Locacar | Área de gerênciamento dos alugueis{%endblock%}
+
+
+{% block addstyle %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/radio-button.css') }}">
+{% endblock%}
+
+<!---Corpo Principal da Pagina-->
+
+{% block page_content %}
+
+  <img class="logo-dashboard" src="{{ url_for('static', filename='images/Logo.png') }}" alt="">
+  <h1 class="titulo">Sistema de Gestão de Alugueis Automotivos Locacar</h1>
+
+  <form class="radio-form">
+
+    <label class="radio-label" for="pendente">PENDENTES
+      <input type="radio" name="escolha" id="pendente"   value="pendente">
+    </label>
+
+    <label class="radio-label" for="ativo">ATIVOS
+      <input type="radio" name="escolha" id="ativo"      value="ativo">
+    </label>
+
+    <label class="radio-label" for="finalizado">FINALIZADOS
+      <input type="radio" name="escolha" id="finalizado" value="finalizado">
+    </label>
+      
+    <label class="radio-label" for="agendado">AGENDADOS
+      <input type="radio" name="escolha" id="agendado"   value="agendado">
+    </label> 
+
+  </form>
+
+
+  <div class="campo" id="campo-pendente">
+    
+    <div class="busca">
+
+      <h1>Alugueis Pendentes: {{ qtd_pendentes }}</h1>
+
+      {% if pendentes %}
+        
+        <table>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Estado</th>
+                <th>Data Inicial</th>
+                <th>Data para Devolução</th>
+                <th>Valor do Aluguel</th>
+                <th>Consultar Cliente</th>
+      
+                
+            </tr>
+            {% for pendentes in pendentes %}
+                <tr>
+                    <td>{{ pendentes["nome_cliente"] }}</td>
+                    <td>{{ pendentes["telefone_cliente"] }}</td>
+                    <td>{{ pendentes["estado_aluguel"] }}</td>
+                    <td>{{ pendentes["data_inicial"] }}</td>
+                    <td>{{ pendentes["data_retorno"] }}</td>
+                    <td>{{ pendentes["valor_devido"] }}</td>
+                    <td>
+                      <form action="/cliente/aluguel" method="POST">
+                        <input type="hidden" id="id_cliente" name="id_cliente" value="{{ pendentes['id_cliente'] }}">
+                        <input type="hidden" id="nome_cliente" name="nome_cliente" value="{{ pendentes['nome_cliente'] }}">
+                        <button type="submit">Consultar</button>
+                      </form>
+                    </td>
+                    
+                    
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if page > 1 %}
+        <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    
+      {% endif %}
+        <a href="{{ url_for('consulta_alugueis', page=page+1) }}"><i class="fa fa-arrow-alt-circle-right"></i></a>
+
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+      <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    {% endif %}
+
+    </div>
+  </div>
+
+  <div class="campo" id="campo-finalizado">
+    
+    <div class="busca">
+
+      <h1>Alugueis Finalizados: {{ qtd_finalizados }}</h1>
+
+      {% if finalizados %}
+        
+        <table>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Estado</th>
+                <th>Data Inicial</th>
+                <th>Data para Devolução</th>
+                <th>Valor do Aluguel</th>
+                <th>Consultar Cliente</th>
+      
+                
+            </tr>
+            {% for finalizados in finalizados %}
+                <tr>
+                    <td>{{ finalizados["nome_cliente"] }}</td>
+                    <td>{{ finalizados["telefone_cliente"] }}</td>
+                    <td>{{ finalizados["estado_aluguel"] }}</td>
+                    <td>{{ finalizados["data_inicial"] }}</td>
+                    <td>{{ finalizados["data_retorno"] }}</td>
+                    <td>{{ finalizados["valor_devido"] }}</td>
+                    <td>
+                      <form action="/cliente/aluguel" method="POST">
+                        <input type="hidden" id="id_cliente" name="id_cliente" value="{{ finalizados['id_cliente'] }}">
+                        <input type="hidden" id="nome_cliente" name="nome_cliente" value="{{ finalizados['nome_cliente'] }}">
+                        <button type="submit">Consultar</button>
+                      </form>
+                    </td>
+                    
+                    
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if page > 1 %}
+        <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    
+      {% endif %}
+        <a href="{{ url_for('consulta_alugueis', page=page+1) }}"><i class="fa fa-arrow-alt-circle-right"></i></a>
+
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+      <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    {% endif %}
+
+    </div>
+  </div>
+
+  <div class="campo" id="campo-agendado">
+    
+    <div class="busca">
+
+      <h1>Alugueis Agendados: {{ qtd_agendados }}</h1>
+
+      {% if agendados %}
+        
+        <table>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Estado</th>
+                <th>Data Inicial</th>
+                <th>Data para Devolução</th>
+                <th>Valor do Aluguel</th>
+                <th>Consultar Cliente</th>
+      
+                
+            </tr>
+            {% for agendados in agendados %}
+                <tr>
+                    <td>{{ agendados["nome_cliente"] }}</td>
+                    <td>{{ agendados["telefone_cliente"] }}</td>
+                    <td>{{ agendados["estado_aluguel"] }}</td>
+                    <td>{{ agendados["data_inicial"] }}</td>
+                    <td>{{ agendados["data_retorno"] }}</td>
+                    <td>{{ agendados["valor_devido"] }}</td>
+                    <td>
+                      <form action="/cliente/aluguel" method="POST">
+                        <input type="hidden" id="id_cliente" name="id_cliente" value="{{ agendados['id_cliente'] }}">
+                        <input type="hidden" id="nome_cliente" name="nome_cliente" value="{{ agendados['nome_cliente'] }}">
+                        <button type="submit">Consultar</button>
+                      </form>
+                    </td>
+                    
+                    
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if page > 1 %}
+        <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    
+      {% endif %}
+        <a href="{{ url_for('consulta_alugueis', page=page+1) }}"><i class="fa fa-arrow-alt-circle-right"></i></a>
+
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+      <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    {% endif %}
+
+    </div>
+  </div>
+
+  <div class="campo" id="campo-ativo">
+    
+    <div class="busca">
+
+      <h1>Alugueis Ativos: {{ qtd_ativos }}</h1>
+
+      {% if ativos %}
+        
+        <table>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Estado</th>
+                <th>Data Inicial</th>
+                <th>Data para Devolução</th>
+                <th>Valor do Aluguel</th>
+                <th>Consultar Cliente</th>
+      
+                
+            </tr>
+            {% for ativos in ativos %}
+                <tr>
+                    <td>{{ ativos["nome_cliente"] }}</td>
+                    <td>{{ ativos["telefone_cliente"] }}</td>
+                    <td>{{ ativos["estado_aluguel"] }}</td>
+                    <td>{{ ativos["data_inicial"] }}</td>
+                    <td>{{ ativos["data_retorno"] }}</td>
+                    <td>{{ ativos["valor_devido"] }}</td>
+                    <td>
+                      <form action="/cliente/aluguel" method="POST">
+                        <input type="hidden" id="id_cliente" name="id_cliente" value="{{ ativos['id_cliente'] }}">
+                        <input type="hidden" id="nome_cliente" name="nome_cliente" value="{{ ativos['nome_cliente'] }}">
+                        <button type="submit">Consultar</button>
+                      </form>
+                    </td>
+                    
+                    
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if page > 1 %}
+        <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    
+      {% endif %}
+        <a href="{{ url_for('consulta_alugueis', page=page+1) }}"><i class="fa fa-arrow-alt-circle-right"></i></a>
+
+    {% else %}
+      <h1>Não foram encontrados resultados.</h1>
+      <a href="{{ url_for('consulta_alugueis', page=page-1) }}"><i class="fa fa-arrow-alt-circle-left"></i></a>
+    {% endif %}
+
+    </div>
+  </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/funcs_alug_control.js') }}"></script>
+{% endblock %}
+

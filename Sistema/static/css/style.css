@@ -1,11 +1,340 @@
-table {
-    border-collapse: collapse;
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Mono:wght@400;700&display=swap');
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    display: grid;
+    grid-template-areas: 
+    "header main main main"
+    "header main main main"
+    "header footer footer footer";
+    grid-template-columns: repeat(4, 1fr);
+    font-size: 1.6rem;
+    font-family: 'Space Mono', monospace;
+
+
+}
+
+
+/* MENU */
+
+.header {
+    grid-area: header;
+    background-color: #000;
+    font-family: 'Black Ops One', cursive;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.header img{
+    padding-top: 50px;
+    padding-bottom: 50px;
+    width: 200px;
+}
+
+.header .lista-de-paginas{
+    top: 0; /* Define a posição inicial na parte superior da janela */
+    z-index: 1;
+}
+
+.header ul {
     width: 100%;
+    padding: 0px 10px 40px 30px;
+}
+
+.header ul li{
+    padding-bottom: 10px;
+    transition: 0.4s;
+    font-size: 1.5rem;
+    color:#fff;
+}
+
+.header ul li:hover{
+    transition: 0.4s;
+    font-size: 2rem;
+
+}
+
+.header i a{
+    
+    font-family: 'Black Ops One', cursive !important;
+    font-weight: 400;
+    padding-left: 10px;
+}
+
+.header ul li a, .header ul li i{ 
+    color:#fff;
+}
+
+.header ul li a:hover, .header ul li i:hover { 
+    color:#808080;
+}  
+
+
+
+/*  MAIN  */  
+
+.main {
+    grid-area: main;
+    background-color: #fff;
+    max-width: var(--max-width-size);
+    min-height: 100vh;
+    padding: 60px 20px 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 10px 0px 6px rgba(0, 0, 0, 0.259) inset;
+}
+
+
+.main table {
+
+    border-collapse: collapse;
+    width: 80%;
+    font-size: 1.5rem;
 } 
 
-th, td {
+.main th{
+    background-color: #808080;
+}
+
+.main th,.main  td {
     text-align: left;
     padding: 8px;
-}
-tr:nth-child(even) {background-color: #f2f2f2;}
+    border-left: 1px solid black;
 
+}
+
+.main th:last-child, .main td:last-child {
+    border-right: 1px solid black;
+}
+
+
+
+.main tr button{
+    background-color: white;
+    border: 1px solid #000;
+    border-radius: 10px;
+    transition: 0,4s;
+    font-size: 1.5rem;
+    font-weight: 900;
+    padding: 2px;
+}
+
+.main tr button:hover{
+    background-color: rgb(139, 225, 135);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.main tr:nth-child(even) {background-color: #f2f2f2;}
+
+.main table td a:hover{
+    color: gold;
+}
+
+.main .cadastro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 80px 20px 80px 20px;
+    border-radius: 25px;
+    border: 2px solid #000;
+    margin-top: 20px;
+    margin-bottom: 60px;
+    background-color: #808080;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    text-align: center;
+
+}
+
+.cadastro .form-tipos{
+    align-self: center;
+}
+
+.main .cadastro h1 {
+    padding-bottom: 20px;
+}
+
+.main .busca{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 15px;
+    border: 2px solid #000;
+    padding: 30px 20px 30px 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.main .busca .form{
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.busca.aluguel {
+    width: 100%;
+}
+
+.busca.aluguel .form{
+    flex-direction: column; 
+    width: 100%;
+}
+
+.busca.aluguel .form table{
+    width: 100%;
+}
+
+.main .form label{
+    font-weight: 700;
+}
+
+.form {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    
+}
+
+
+.form input, .form select{
+    width: 100%;
+    height: 35px;
+    border: 1px solid black;
+    background-color: #fff;
+    border-radius: 10px; 
+    font-family: 'Black Ops One', cursive;
+    padding: 5px;
+    transition: 0.4s;
+    font-size: 2rem;
+    text-align: center;
+    
+}
+
+.form input:hover{
+    background-color: gold;
+}
+
+.form input[type="submit"]:hover {
+    cursor: pointer;
+    background-color: goldenrod;
+}
+
+.form-busca{
+    display: block;
+    padding: 20px 0px 30px 0px;
+}
+
+.form-busca input, .form-busca select {
+    width: 20%;
+}
+
+.form input#ddd {   
+    display: inline-block;   
+    padding: 0px;
+    width: 10%;
+}
+
+.form input#ddd_cliente{
+    width: 5%;
+}
+
+.form input#telefone {
+    display: inline-block;
+    padding: 0px;
+    width: 75%;
+}
+
+.form input#ddd, .form input#ddd_cliente{
+    text-align: center;
+    border-bottom: #fff;
+    border-top: #fff;   
+}
+
+
+.form-pagamento{
+    width: 100%;
+}
+.form-pagamento textarea {
+    padding: 10px;
+    border-radius: 15px;
+    background-color: white;
+    width: 100%;
+    min-height: 100px;
+    margin-bottom: 50px;
+}
+
+.form-pagamento textarea:focus {
+    background-color: gold;
+}
+
+.form-pagamento input {
+    margin-bottom: 20px;
+}
+
+/* FOOTER */
+
+.footer {
+    box-shadow: 10px -10px 6px rgba(0, 0, 0, 0.259);
+    grid-area: footer;
+    display: flex;
+    background-color: white;
+    flex-direction: column;
+    text-align: center;
+    padding: 100px 0;
+    font-family: 'Black Ops One', cursive;
+}
+
+.footer h4 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.footer nav {
+    margin: 50px 0;
+}
+
+.footer nav ul {
+    display: flex;
+    justify-content: center;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.footer nav ul li a {
+    font-weight: 500;
+    font-size: 2rem;
+    margin: 20px;
+    transition: 0.3s;
+}
+
+.footer nav ul li a:hover {
+    font-weight: 700;
+    color: white;
+}
+
+.footer .social i {
+    font-size: 2rem;
+    transition: 0.3s;
+}
+
+.footer .social a {
+    margin: 20px;
+}
+
+.footer .social i:hover {
+    color: white;
+}
