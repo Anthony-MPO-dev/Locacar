@@ -28,6 +28,7 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 O **Locacar** oferece as seguintes funcionalidades:
 
+
 - Cadastro de clientes com informações detalhadas, incluindo ID único, nome e telefone.
 
 - Registro e categorização de carros disponíveis para aluguel em cinco tipos principais: COMPACTO, MÉDIO, GRANDE, SUV e CAMINHÃO.
@@ -41,6 +42,10 @@ O **Locacar** oferece as seguintes funcionalidades:
 - Restrições de pagamento que incentivam o pagamento integral de débitos.
 
 - Atualização automática de estados de aluguéis.
+
+- Controle de preços das multas, taxas diárias e semanais.
+
+- Cadastro e gerenciamento de carros, incluindo marca, modelo e ano.
 
 ## Instalação
 
