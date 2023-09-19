@@ -1,8 +1,8 @@
-# Locarcar - Sistema de Gerenciamento de Alugueis de Carros
+# Locacar - Sistema de Gerenciamento de Alugueis de Carros
 
 ## Visão Geral
 
-O **Locarcar** é um sistema web de gerenciamento de aluguéis de carros projetado para facilitar o processo de aluguel e monitoramento de veículos em uma locadora. Este sistema oferece funcionalidades abrangentes, desde o cadastro de clientes e carros até o acompanhamento dos aluguéis e pagamentos.
+O **Locacar** é um sistema web de gerenciamento de aluguéis de carros projetado para facilitar o processo de aluguel e monitoramento de veículos em uma locadora. Este sistema oferece funcionalidades abrangentes, desde o cadastro de clientes e carros até o acompanhamento dos aluguéis e pagamentos.
 
 ## Slogan
 
@@ -26,7 +26,7 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 ## Funcionalidades
 
-O **Locarcar** oferece as seguintes funcionalidades:
+O **Locacar** oferece as seguintes funcionalidades:
 
 - Cadastro de clientes com informações detalhadas, incluindo ID único, nome e telefone.
 
@@ -60,7 +60,7 @@ Para rodar a aplicação localmente, siga estas etapas:
 
 ## Contribuição
 
-Sinta-se à vontade para contribuir, fazer melhorias ou relatar problemas. Basta abrir uma [issue](https://github.com/seu-usuario/locarcar/issues) ou enviar um [pull request](https://github.com/seu-usuario/locarcar/pulls).
+Sinta-se à vontade para contribuir, fazer melhorias ou relatar problemas. Basta abrir uma [issue](https://github.com/seu-usuario/Locacar/issues) ou enviar um [pull request](https://github.com/seu-usuario/Locacar/pulls).
 
 ## Licença
 
