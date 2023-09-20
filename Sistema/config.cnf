@@ -3,4 +3,4 @@ host = localhost
 port = 3306
 database = LOCACAR
 user = root
-password = @Agosto10
+password = root
