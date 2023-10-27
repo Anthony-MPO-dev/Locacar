@@ -24,10 +24,10 @@ INSERT INTO Cliente (nome_cliente, telefone_cliente) VALUES
 -- Inserção de Tipos de Carros
 INSERT INTO Tipo (nome_tipo, valor_diario, valor_semanal, multa_diaria, multa_semanal) VALUES
     ('COMPACTO', 50.00, 300.00, 5.00, 100.00),
-    ('MEDIO', 70.00, 420.00, 7.00, 210.00),
-    ('GRANDE', 90.00, 540.00, 9.00, 270.00),
-    ('SUV', 100.00, 600.00, 10.00, 300.00),
-    ('CAMINHAO', 120.00, 720.00, 20.00, 360.00);
+    ('MEDIO', 70.00, 510.00, 7.00, 210.00),
+    ('GRANDE', 90.00, 650.00, 9.00, 270.00),
+    ('SUV', 100.00, 850.00, 10.00, 300.00),
+    ('CAMINHAO', 120.00, 900.00, 20.00, 360.00);
 
 -- Inserções fictícias para a tabela Carro
 INSERT INTO Carro (tipo, marca, modelo, ano) VALUES
@@ -56,14 +56,17 @@ INSERT INTO Carro (tipo, marca, modelo, ano) VALUES
 
 -- Inserção de Aluguéis (ATIVOS, AGENDADOS, FINALIZADOS)
 INSERT INTO Aluguel (data_inicial, id_cliente, id_carro, estado_aluguel, NumeroDeDias, data_retorno) VALUES
-    ('2023-09-15 09:30:00', 2, 2, 'AGENDADO', 7, (SELECT CalcularDataTerminoAluguel('2023-09-15 09:30:00', 7))),
-    ('2023-09-14 14:15:00', 4, 4, 'ATIVO', 2, (SELECT CalcularDataTerminoAluguel('2023-09-14 14:15:00', 2))),
-    ('2023-09-15 16:30:00', 5, 5, 'AGENDADO', 4, (SELECT CalcularDataTerminoAluguel('2023-09-15 16:30:00', 4))),
-    ('2023-09-03 16:30:00', 6, 6, 'ATIVO', 5, (SELECT CalcularDataTerminoAluguel('2023-09-03 16:30:00', 5)));
+    ('2023-10-29 09:30:00', 2, 2, 'AGENDADO', 7, (SELECT CalcularDataTerminoAluguel('2023-10-29 09:30:00', 7))),
+    ('2023-10-26 14:15:00', 4, 4, 'ATIVO', 3, (SELECT CalcularDataTerminoAluguel('2023-10-26 14:15:00', 3))),
+    ('2023-10-28 16:30:00', 5, 5, 'AGENDADO', 4, (SELECT CalcularDataTerminoAluguel('2023-10-28 16:30:00', 4))),
+    ('2023-10-27 4:30:00', 6, 6, 'ATIVO', 5, (SELECT CalcularDataTerminoAluguel('2023-10-27 4:30:00', 5)));
     
 INSERT INTO Aluguel (data_inicial, id_cliente, id_carro, estado_aluguel, NumeroDeDias, data_retorno, relatorio) VALUES
-	('2023-09-01 08:00:00', 1, 1, 'FINALIZADO', 3, (SELECT CalcularDataTerminoAluguel('2023-09-01 08:00:00', 3)), 'Relatório: Carro entregue tudo ok...'),
-    ('2023-09-01 11:45:00', 3, 3, 'FINALIZADO', 3, (SELECT CalcularDataTerminoAluguel('2023-09-01 11:45:00', 3)), 'Relatório: Carro entregue tudo ok...');
-    
+	('2023-10-15 08:00:00', 1, 1, 'FINALIZADO', 11, (SELECT CalcularDataTerminoAluguel('2023-10-15 08:00:00', 11)), 'Relatório: Carro entregue tudo ok...'),
+    ('2023-09-21 11:45:00', 3, 3, 'FINALIZADO', 5, (SELECT CalcularDataTerminoAluguel('2023-10-21 11:45:00', 5)), 'Relatório: Carro entregue tudo ok...');
+
+INSERT INTO Aluguel (data_inicial, id_cliente, id_carro, estado_aluguel, NumeroDeDias, data_retorno) VALUES
+	('2023-10-21 08:00:00', 1, 1, 'PENDENTE', 5, (SELECT CalcularDataTerminoAluguel('2023-10-21 08:00:00', 5)));
+
 
 

@@ -3,4 +3,5 @@ host = localhost
 port = 3306
 database = LOCACAR
 user = root
-password = root
+password = @Agosto10
+isolation_level = SERIALIZABLE

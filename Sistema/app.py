@@ -19,27 +19,22 @@ def pagina_principal():
 
     try:
         con = get_connection()
-        cur = con.cursor()
+        cur = con.cursor(dictionary=True)
 
+    except Exception as e:
+        flash(f'Erro de conexão: {str(e)}', 'error')
+        return render_template('erroBD.html')
+    
+    try:
         # Chame a stored procedure para atualizar alugueis
         cur.callproc('atualizar_estado_alugueis')
 
-        # Certifique-se de fazer o commit das alterações
-        con.commit()
-
-        cur.close()
+    except Exception as e:
+        flash(f'Erro de conexão não foi possivel chamar a procedure para atualizar alugueis: {str(e)}', 'error')
+        con.rollback()
         con.close()
-
-        print('Alugueis atualizados com sucesso!')
-    except Exception as e:
-        flash(f'Erro ao chamar a procedure: {str(e)}', 'error')
-
-    try:
-        con = get_connection()
-        cur = con.cursor(dictionary=True)
-    except Exception as e:
-        flash(f'Erro iniciar conexao: {str(e)}', 'error')
-    
+        cur.close()
+        return render_template('erroBD.html')
     try: 
         
         sql = """
@@ -48,10 +43,18 @@ def pagina_principal():
                 JOIN Aluguel AS A ON C.id_cliente = A.id_cliente
                 WHERE A.estado_aluguel IN ('PENDENTE', 'ATIVO', 'AGENDADO', 'FINALIZADO')
             """
-            
-
-        cur.execute(sql)
         
+        cur.execute(sql)
+
+    except Exception as e:
+        con.rollback()
+        con.close()
+        cur.close()
+        flash(f'Erro na execucao sql nao foi possivel verificar alugueis dos clientes: {str(e)}', 'error')
+        return render_template('erroBD.html')
+
+    try:
+
         alugueis = cur.fetchall()
 
         for row in alugueis:
@@ -62,7 +65,8 @@ def pagina_principal():
             estado_aluguel = row['estado_aluguel']
 
             if (valor_devido == None) or (estado_aluguel != 'FINALIZADO'):
-                value = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
+                #Função que atualiza multas e valor devido ao final do aluguel
+                value, cur, con = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
                 
                 if value != 1:
                     return value
@@ -70,11 +74,15 @@ def pagina_principal():
                 pass
     
     except Exception as e:
-        flash(f'Erro na verificacao: {str(e)}', 'error')
+        con.rollback()
+        con.close()
+        cur.close()
+        flash(f'Erro na verificacao do valor devido: {str(e)}', 'error')
+        return render_template('erroBD.html')
 
+    con.commit()
     con.close()
     cur.close()
-
 
     flash('Todos os alugueis atualizados!:', 'success')
     return render_template('index.html')
@@ -565,8 +573,7 @@ def aluguel_cliente():
         start_index = (page - 1) * per_page
         end_index = start_index + per_page
 
-        nome_cli = {}
-
+        print(id)
         print(nome)
 
         try:
@@ -608,10 +615,7 @@ def aluguel_cliente():
 
                 con.close()
                 cur.close()
-
-                
-
-                return render_template("listar_alugueis_cliente.html", dados=tuplas, nome_cliente=nome, page=page)
+                return render_template("listar_alugueis_cliente.html", dados=tuplas, nome_cliente=nome, id_cliente=id)
             except Exception as err:
                 flash(f'Erro na busca de alugueis do cliente: {err}', 'error')
                 con.close()
@@ -629,10 +633,6 @@ def aluguel_cliente():
 @app.route('/cliente/aluguel/carros', methods=['POST'])
 def carros_do_aluguel():
     if request.method == 'POST':
-
-        page = int(request.args.get('page', 1))
-        start_index = (page - 1) * per_page
-        end_index = start_index + per_page
 
         # Obtenha o ID do aluguel do formulário
         id_cliente = request.form.get('id_cliente')
@@ -654,17 +654,17 @@ def carros_do_aluguel():
                 SELECT C.*
                 FROM Carro AS C
                 INNER JOIN Aluguel AS A ON C.id_carro = A.id_carro
-                WHERE A.id_cliente = %s AND A.data_inicial = %s LIMIT %s,%s;
+                WHERE A.id_cliente = %s AND A.data_inicial = %s;
             """
 
-            cur.execute(sql, (id_cliente, data_inicial, start_index, end_index))
+            cur.execute(sql, (id_cliente, data_inicial))
             tuplas = cur.fetchall()
 
             cur.close()
             con.close()
 
             # Renderize um modelo HTML para exibir os carros
-            return render_template("listar_carros_aluguel.html", carros=tuplas, relatorio=relatorio, page=page)
+            return render_template("listar_carros_aluguel.html", carros=tuplas, relatorio=relatorio)
 
         except Exception as err:
             flash(f'Erro ao buscar carros do aluguel: {err}', 'error')
@@ -682,10 +682,6 @@ def carros_do_aluguel():
 def novo_aluguel():
     if request.method == 'POST':
 
-        page = int(request.args.get('page', 1))
-        start_index = (page - 1) * per_page
-        end_index = start_index + per_page
-
         id_cliente = request.form.get('id_cliente')
         data_inicial = request.form.get('data_inicial')
         numero_dias = request.form.get('numero_de_dias')
@@ -693,27 +689,58 @@ def novo_aluguel():
 
         print(id_cliente)
         print(data_inicial)   
-        print(numero_dias)                   
-
-        #Verifica a data e retorna o sql a ser usado e o estado a ser cadastrado o aluguel
-        sql_carros, estado = verifica_data(data_inicial)
+        print(numero_dias)    
 
         try:
             con = get_connection()
-            cur = con.cursor(dictionary=True)
+            cur = con.cursor(dictionary=True)  
 
-            
+            sql = """
+                    SELECT count(C.id_carro) as num
+                    FROM Carro AS C
+                    INNER JOIN Aluguel AS A ON C.id_carro = A.id_carro
+                    WHERE A.estado_aluguel="PENDENTE" AND A.id_cliente = %s;       
+                """             
             try:
-                cur.execute(sql_carros)
-                carros = cur.fetchall()
+
+                cur.execute(sql, (id_cliente,))
+                num_alugueis_pendentes = cur.fetchone()
+                num_alugueis_pendentes = num_alugueis_pendentes['num']
+                print(f"num: {num_alugueis_pendentes}")
 
             except Exception as err:
-                flash(f'Erro na seleção de carros para o aluguel: {err}', 'error')
+                flash(f'Erro na verificação dos alugueis do cliente: {err}', 'error')
                 cur.close()
                 con.close()
                 return redirect(url_for('lista_clientes'))
+
         except Exception as err:
-            flash(f'Erro ao buscar carros para o aluguel: {err}', 'error')
+                flash(f'Erro na conexão com banco: {err}', 'error')
+                return redirect(url_for('lista_clientes'))
+
+
+        try:
+            if num_alugueis_pendentes > 0:
+                flash('Cliente Possui alugueis pendentes, não é permitido inserir novo aluguel', 'error')
+                con.close()
+                cur.close()
+                return redirect(url_for('lista_clientes'))
+            
+            #Verifica a data e retorna o sql a ser usado e o estado a ser cadastrado o aluguel
+            sql_carros, estado = verifica_data(data_inicial)
+
+        except Exception as err:
+            flash(f'Erro na verificacao da data: {err}', 'error')
+            cur.close()
+            con.close()
+            return redirect(url_for('lista_clientes'))
+            
+        try:
+            cur.execute(sql_carros)
+            carros = cur.fetchall()
+
+        except Exception as err:
+            flash(f'Erro na seleção de carros para o aluguel: {err}', 'error')
             cur.close()
             con.close()
             return redirect(url_for('lista_clientes'))
@@ -727,10 +754,6 @@ def novo_aluguel():
 @app.route('/novo_aluguel/cadastrar', methods=['POST'])
 def cadastra_aluguel():
     if request.method == 'POST':
-
-        page = int(request.args.get('page', 1))
-        start_index = (page - 1) * per_page
-        end_index = start_index + per_page
 
         id_cliente = request.form.get('id_cliente')
         data_inicial = request.form.get('data_inicial')
@@ -825,6 +848,7 @@ def cadastra_aluguel():
         con.close()
         cur.close()
 
+        flash(f'Carro Alugado com sucesso!', 'success')
         # Renderize um modelo HTML para exibir os clientes
         return redirect(url_for('lista_clientes'))
 
@@ -838,29 +862,15 @@ def consulta_alugueis():
 
     try:
         con = get_connection()
-        cur = con.cursor()
+        cur = con.cursor(dictionary=True)
 
         # Chame a stored procedure para atualizar alugueis
         cur.callproc('atualizar_estado_alugueis')
 
-        # Certifique-se de fazer o commit das alterações
-        con.commit()
-
-        cur.close()
-        con.close()
-
         print('Alugueis atualizados com sucesso!')
     except Exception as e:
         flash(f'Erro ao chamar a procedure: {str(e)}', 'error')
-        cur.close()
-        con.close()
-        return redirect(url_for('pagina_principal'))
-
-    try:
-        con = get_connection()
-        cur = con.cursor(dictionary=True)
-    except Exception as e:
-        flash(f'Erro iniciar conexao: {str(e)}', 'error')
+        con.rollback()
         cur.close()
         con.close()
         return redirect(url_for('pagina_principal'))
@@ -887,7 +897,7 @@ def consulta_alugueis():
             estado_aluguel = row['estado_aluguel']
 
             if (valor_devido == None) or (estado_aluguel != 'FINALIZADO'):
-                value = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
+                value, cur, con = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
                 
                 if value != 1:
                     return value
@@ -896,6 +906,7 @@ def consulta_alugueis():
     
     except Exception as err:
         flash(f'Erro na busca de alugueis pendentes: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
         return redirect(url_for('pagina_principal'))
@@ -922,7 +933,7 @@ def consulta_alugueis():
             estado_aluguel = row['estado_aluguel']
 
             if (valor_devido == None) or (estado_aluguel != 'FINALIZADO'):
-                value = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
+                value, cur, con = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
                 
                 if value != 1:
                     return value
@@ -931,6 +942,7 @@ def consulta_alugueis():
     
     except Exception as err:
         flash(f'Erro na busca de alugueis ativos: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
         return redirect(url_for('pagina_principal'))
@@ -957,7 +969,7 @@ def consulta_alugueis():
             estado_aluguel = row['estado_aluguel']
 
             if (valor_devido == None) or (estado_aluguel != 'FINALIZADO'):
-                value = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
+                value, cur, con = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
                 
                 if value != 1:
                     return value
@@ -967,6 +979,7 @@ def consulta_alugueis():
     
     except Exception as err:
         flash(f'Erro na busca de alugueis finalizados: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
         return redirect(url_for('pagina_principal'))
@@ -993,7 +1006,7 @@ def consulta_alugueis():
             estado_aluguel = row['estado_aluguel']
 
             if (valor_devido == None) or (estado_aluguel != 'FINALIZADO'):
-                value = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
+                value, cur, con = atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial)
                 
                 if value != 1:
                     return value
@@ -1002,10 +1015,12 @@ def consulta_alugueis():
     
     except Exception as err:
         flash(f'Erro na busca de alugueis agendados: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
         return redirect(url_for('pagina_principal'))
 
+    con.commit()
     con.close()
     cur.close()
 
@@ -1028,9 +1043,10 @@ def atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial):
 
     except Exception as err:
         flash(f'Erro em conseguir o tipo e aluguel do carro: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
-        return redirect(url_for('pagina_principal'))
+        return render_template('erroBD.html')
     
     try:
         
@@ -1049,17 +1065,21 @@ def atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial):
 
     except Exception as err:
         flash(f'Erro na obtenção de valores: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
-        return redirect(url_for('pagina_principal'))
+        return render_template('erroBD.html')
 
     try:
 
         valor_devido = calcula_valor_devido(valor_semanal, valor_diario, numero_dias)
 
         if valor_devido == 0:
+            con.rollback()
+            cur.close()
+            con.close()
             flash('Erro na obtencao de dados!', 'error')
-            return redirect(url_for('pagina_principal'))
+            return render_template('erroBD.html')
         
         try:
             sql_verifica_multa = """
@@ -1082,9 +1102,10 @@ def atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial):
 
         except Exception as err:
             flash(f'Erro ao obter dias passados: {err}', 'error')
+            con.rollback()
             cur.close()
             con.close()
-            return redirect(url_for('pagina_principal'))
+            return render_template('erroBD.html')
 
 
         print (valor_devido)
@@ -1097,15 +1118,15 @@ def atualiza_valor_devido(con, cur, id_cliente, id_carro, data_inicial):
         sql = "UPDATE Aluguel SET valor_devido = %s WHERE id_cliente = %s AND id_carro = %s AND data_inicial = %s"
         
         cur.execute(sql, (valor_devido, id_cliente, id_carro, data_inicial,))
-        con.commit()
         
-        return 1
+        return 1, cur, con
         
     except Exception as err:
         flash(f'Erro nos calulos de valor: {err}', 'error')
+        con.rollback()
         cur.close()
         con.close()
-        return redirect(url_for('pagina_principal'))
+        return render_template('erroBD.html')
 
 
 # -------------- TIPOS  ---------------
@@ -1225,33 +1246,33 @@ def pagamento():
             data_de_retorno = str(data_de_retorno)
             data_do_retorno = str(data_do_retorno)
 
+            # Verificar se a data de pagamento não é invalida
             dias = calcula_dias(data_do_retorno, data_de_retorno)
 
             if estado_aluguel == 'PENDENTE' and dias < 0:
                 flash('Não é permitido pagar em datas passadas a data de retorno se é um pagamento pendente deve ser pago na data atual', 'error')  # Mensagem de erro
+                con.rollback()
+                con.close()
+                cur.close()
                 return redirect(url_for('lista_clientes'))
             
             if estado_aluguel == 'ATIVO':
 
-                
-                
+                #se a data de pagamento for igual a data de retorno
                 if data_do_retorno == data_de_retorno:
-
-                    cur.close()
                     con.close()
-
+                    cur.close()
                     return render_template("area_pagamento.html", dados=tupla, data_retorno=data_de_retorno, valor_devido=valor_devido)
 
                 else:
-
                     try:
-
                         dias = calcula_dias(data_inicial, data_de_retorno) # Calcula o numero de dias que foi alugado o carro até a devolução
 
                         dias = str(dias)
 
                     except Exception as err:
                         flash(f'Erro ao calcular o numero de dias: {err}', 'error')  # Mensagem de erro
+                        con.rollback()
                         cur.close()
                         con.close()
                         return redirect(url_for('lista_clientes'))
@@ -1277,10 +1298,9 @@ def pagamento():
 
                         valor_devido = calcula_valor_devido(valor_semanal, valor_diario, dias)
 
-                        
-
                     except Exception as err:
                         flash(f'Erro ao calcular o novo valor devido: {err}', 'error')  # Mensagem de erro
+                        con.rollback()
                         cur.close()
                         con.close()
                         return redirect(url_for('lista_clientes'))
@@ -1289,11 +1309,12 @@ def pagamento():
 
         except Exception as err:
             flash(f'Erro ao verificar data de retorno: {err}', 'error')  # Mensagem de erro
+            con.rollback()
             cur.close()
             con.close()
             return redirect(url_for('pagina_principal'))
         
-
+        
         con.close()
         cur.close()
 
@@ -1320,13 +1341,9 @@ def pagamento_aluguel():
         print(valor_pago)
         print(relatorio)
 
-        print("Chegou aqui!")
-
         try:
             con = get_connection()
             cur = con.cursor(dictionary=True)
-
-            print("Chegou aqui!1")
 
         except Exception as err:
             flash(f'Erro ao conectar no Banco: {err}', 'error')  # Mensagem de erro
@@ -1336,15 +1353,12 @@ def pagamento_aluguel():
 
         if valor_pago > valor_devido:
 
-            print("Chegou aqui!2")
             flash('Erro no pagamento: Valor pago maior que o devido', 'error')  # Mensagem de erro
             con.close()
             cur.close()
             return redirect(url_for('lista_clientes'))
         
         elif valor_pago < valor_devido:
-
-            print("Chegou aqui!3")
 
             # Valor pago tem que ser maior que 70% do valor devido
             if valor_pago > (valor_devido*0.7):
@@ -1353,38 +1367,32 @@ def pagamento_aluguel():
 
                 print(valor_devido)
                 
-                sql = """ UPDATE Aluguel 
+                sql = """ 
+                        UPDATE Aluguel 
                         SET valor_devido = %s, data_inicial=%s, data_retorno=%s, estado_aluguel = 'PENDENTE', NumeroDeDias=1, relatorio=%s
                         WHERE id_cliente = %s AND id_carro = %s AND data_inicial = %s
                         """
 
                 try:
 
-                    print("Chegou aqui!4")
-
                     cur.execute(sql, (valor_devido, data_retorno, data_retorno, relatorio, id_cliente, id_carro, data_inicial,))
-                    con.commit()
-
-                    print("Chegou aqui!11")
 
                 except Exception as err:
                     flash(f'Erro no pagamento: Não foi possivel atualizar o valor da divida({err})', 'error')  # Mensagem de erro
+                    con.rollback()
                     con.close()
                     cur.close()
                     return redirect(url_for('lista_clientes'))
                 
             else:
 
-                print("Chegou aqui 10")
-
                 flash('Erro no pagamento: Não foi possivel atualizar o valor da divida, o pagamento tem que ser maior que 70% do valor devido', 'error')  # Mensagem de erro
+                con.rollback()
                 con.close()
                 cur.close()
                 return redirect(url_for('lista_clientes'))
             
         elif valor_pago == valor_devido:
-
-            print("Chegou aqui!5")
 
             sql = """ UPDATE Aluguel 
                         SET estado_aluguel = 'FINALIZADO', relatorio = %s, valor_devido =%s, data_retorno =%s
@@ -1394,37 +1402,34 @@ def pagamento_aluguel():
 
             try:
 
-                print("Chegou aqui!6")
-
                 cur.execute(sql, (relatorio, valor_pago, data_retorno,id_cliente, id_carro, data_inicial,))
-                con.commit()
 
             except Exception as err:
                 flash(f'Erro no pagamento: Não foi possivel atualizar o valor da divida({err})', 'error')  # Mensagem de erro   
+                con.rollback()
                 con.close()
                 cur.close()
                 return redirect(url_for('lista_clientes'))
         
         else:
 
-            print("Chegou aqui!7")
-
             flash('Algo errado aconteceu!', 'error')
+            con.rollback()
             con.close()
             cur.close()
             return redirect(url_for('pagina_principal'))
 
+        con.commit()
         con.close()
         cur.close()
-
-        print("Cheguei no final")
                 
         flash('Atualização de Pagamento realizado com sucesso!', 'success')
         return redirect(url_for('lista_clientes'))
 
     else:
-        print("Chegou aqui!7")
+
         flash('Algo errado aconteceu!', 'error')
+        con.rollback()
         con.close()
         cur.close()
         return redirect(url_for('lista_clientes'))
